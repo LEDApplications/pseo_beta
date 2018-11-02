@@ -52,6 +52,7 @@ function resetUI(){
   // reset the UI
   $j33("#checkbox-grid").empty();
   $j33("#cohort-dropdown").empty();
+  $j33("#institution-dropdown").empty();
   $j33('#dropdownCohortButton').text("Select Cohort");
   if ($j33('#dropdownCohortButton').hasClass("active")){
     $j33('#dropdownCohortButton').removeClass("active");
@@ -1082,9 +1083,8 @@ function setupInstitutionDropdown(institutions) {
   });
   
   $j33('#institution-dropdown a').click(function(){
-    // reset all of the dropdowns
-    resetUI();
-  
+
+
     // save the degree for filtering the data in the callback (get distinct degrees)
     var selectedSchool = this.id.replace(/_/g,' '); //swap back the spaces/underscores for data selection
     
@@ -1097,7 +1097,7 @@ function setupInstitutionDropdown(institutions) {
     // initilize the filter to the school id
     var filter = {school: selectedSchool};
     // filter the raw data with the cohort selection
-    pseoData.schoolJson = filterJSONMatchAll(pseoData.stateJson, filter);
+    pseoData.schoolJson = filterJSONMatchAll(pseoData.degreeLevelJson, filter);
     
     // get the distinct cohorts
     // (callback) fill out and configure the dropdown
@@ -1109,11 +1109,50 @@ function setupInstitutionDropdown(institutions) {
   });
   
   // select example institution
-  if ($j33("#dropdownStateButton").text() == "TEXAS") {
+  if ( ($j33("#dropdownStateButton").text() == "TEXAS") && ($j33("#dropdownDegreeLevelButton").text() == "Baccalaureate") ) {
     $j33('#institution-dropdown > #UNIVERSITY_OF_TEXAS-AUSTIN').trigger('click');
-  } else if ($j33("#dropdownStateButton").text() == "COLORADO") {
+  } else if ( ($j33("#dropdownStateButton").text() == "COLORADO") && ($j33("#dropdownDegreeLevelButton").text() == "Baccalaureate") ) {
     $j33('#institution-dropdown > #UNIVERSITY_OF_COLORADO-BOULDER').trigger('click');
+  } else {
+    console.log("other");
+    $j33('#institution-dropdown :first-child').trigger('click');
   }
+
+}
+
+function setupDegreeLevelDropdown(degreelevel) {
+
+  $j33.each(degreelevel.sort(), function( index, value ) {
+    var institution='<a class="dropdown-item" id="'+value.replace(/ /g,'_')+'">'+value+'</a>';
+    $j33("#degreelevel-dropdown").append(institution);
+  });
+
+  $j33('#degreelevel-dropdown a').click(function() {
+    // reset all of the dropdowns
+    resetUI();
+
+    var selectedDegreeLevel = this.id.replace(/_/g,' ');
+    // change the dropdown to show the selected degree
+    $j33('#dropdownDegreeLevelButton').text(selectedDegreeLevel);
+    if (!$j33('#dropdownDegreeLevelButton').hasClass("active")){
+      $j33('#dropdownDegreeLevelButton').addClass("active");
+    }
+    // initilize the filter to the school id
+    var filter = {degreelevel: selectedDegreeLevel};
+    // filter the raw data with the cohort selection
+    pseoData.degreeLevelJson = filterJSONMatchAll(pseoData.stateJson, filter);
+
+    // get the distinct cohorts
+    // (callback) fill out and configure the dropdown
+    getDistinctValues(pseoData.degreeLevelJson, 'school', setupInstitutionDropdown);
+
+    $j33("#degreelevel-dropdown").removeClass('show');
+
+    return false;
+  })
+
+  // select the colorado data
+  $j33('#degreelevel-dropdown > #Baccalaureate').trigger('click');
 
 }
 
@@ -1141,10 +1180,10 @@ function setupStateDropdown(states) {
     var filter = {state: selectedState};
     // filter the raw data with the cohort selection
     pseoData.stateJson = filterJSONMatchAll(pseoData.rawJson, filter);
-    
+
     // get the distinct cohorts
     // (callback) fill out and configure the dropdown
-    getDistinctValues(pseoData.stateJson, 'school', setupInstitutionDropdown);
+    getDistinctValues(pseoData.stateJson, 'degreelevel', setupDegreeLevelDropdown);
 
     $j33("#state-dropdown").removeClass('show');
     
@@ -1160,10 +1199,11 @@ function setupStateDropdown(states) {
 d3.csv("graduate_earnings_all.csv", function(d) {
 
   // Discard suppressed cells and non bachelors degrees
-  if ( (d.cell_suppressed !== "1") && (d.deglevl === "Baccalaureate") ){
+  if ( d.cell_suppressed !== "1"){
   // convert variables to numeric
   return {
     state: d.state,
+    degreelevel: d.deglevl,
     school : d.institution_name,
     degree : toTitleCase(d.ciptitle),
     cohort : d.grad_cohort_label,
