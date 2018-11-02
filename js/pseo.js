@@ -1100,6 +1100,7 @@ function setupInstitutionDropdown(institutions) {
     
     // get the distinct cohorts
     // (callback) fill out and configure the dropdown
+    $j33("#cohort-dropdown").empty();
     getDistinctValues(pseoData.schoolJson, 'cohort', setupCohortDropdown);
 
     $j33("#institution-dropdown").removeClass('show');
