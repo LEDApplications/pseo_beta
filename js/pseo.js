@@ -43,10 +43,9 @@ function openInNewTab(url) {
 }
 
 function resetST(){
-  $j33("#institution-dropdown").empty();
+  $j33("#degreelevel-dropdown").empty();
   resetUI();
 }
-
 
 function resetUI(){
   // reset the UI
