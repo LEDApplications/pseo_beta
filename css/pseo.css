@@ -53,13 +53,13 @@
 .controlpanel {
   float: left;
   width: 10rem;
-  height: 35rem;
+  height: 36rem;
   margin-bottom: .5rem;
   border-radius: .25rem;
 }
 
 .chartcontainer {
-  height: 35rem;
+  height: 36rem;
   margin-left: 10.5rem;
   margin-bottom: .5rem;
   border-radius: .25rem;
